@@ -225,18 +225,22 @@ module Ohai
     end
 
     def attributes_print(a)
-      raise ArgumentError, "I cannot find an attribute named #{a}!" unless @data.has_key?(a)
+      data = @data
+      a.split("/").each do |part|
+        data = data[part]
+      end
+      raise ArgumentError, "I cannot find an attribute named #{a}!" if data.nil?
       case a
       when Hash,Mash,Array
-        JSON.pretty_generate(@data[a])
+        JSON.pretty_generate(data)
       when String
-        if @data[a].respond_to?(:lines)
-          JSON.pretty_generate(@data[a].lines.to_a)
+        if data.respond_to?(:lines)
+          JSON.pretty_generate(data.lines.to_a)
         else
-          JSON.pretty_generate(@data[a].to_a)
+          JSON.pretty_generate(data.to_a)
         end
       else
-        raise ArgumentError, "I can only generate JSON for Hashes, Mashes, Arrays and Strings. You fed me a #{@data[a].class}!"
+        raise ArgumentError, "I can only generate JSON for Hashes, Mashes, Arrays and Strings. You fed me a #{data.class}!"
       end
     end
 
